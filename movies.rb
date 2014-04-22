@@ -10,36 +10,42 @@ configure do
 end
 
 get '/' do
-  #Add code here
+
+erb :index
+end
+
+get '/movies' do
+  # binding.pry
+ c = PGconn.new(:host => "localhost", :dbname => dbname) #creates new connection to database
+ @movies = c.exec_params("select * from movies WHERE title = $1;", [params["title"]]) #exec_params allows you access variables           
+  c.close
+  binding.pry 
 end
 
 
 #Add code here
+#query the database for the movie_name that matches it
 
-
-get '/movies/new' do
-  erb :new_movie
+get '/movies/new' do #this seraches the database for the movie/title 
+  erb :new
 end
 
 post '/movies' do
-  c = PGconn.new(:host => "localhost", :dbname => dbname)
-  c.exec_params("INSERT INTO movies (title, year) VALUES ($1, $2)",
+  c = PGconn.new(:host => "localhost", :dbname => dbname) #creates new connection to database
+  c.exec_params("INSERT INTO movies (title, year) VALUES ($1, $2)", #exec_params allows you access variables
                   [params["title"], params["year"]])
   c.close
   redirect '/'
 end
 
 def dbname
-  "test.db"
+  "testdb"
 end
 
 def create_movies_table
   connection = PGconn.new(:host => "localhost", :dbname => dbname)
   connection.exec %q{
-  CREATE TABLE movies (
-    id SERIAL PRIMARY KEY,
-    title varchar(255),
-    year varchar(255),
+    ,
     plot text,
     genre varchar(255)
   );
